@@ -1,0 +1,2 @@
+rootProject.name = "MaspMinaCarajas"
+include ':app'
