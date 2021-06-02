@@ -1,7 +1,14 @@
 package com.example.maspminacarajas;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -12,10 +19,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.maspminacarajas.databinding.ActivityMapsBinding;
 
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
+    List<Address>listaGeoCoder;
+    private static final int LOCATION_PERMISSION_CODE = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +35,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        if (permissaodeLocalizacao()){
+
+// Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        try{listaGeoCoder = new Geocoder(this).getFromLocationName("Mina de Ferro Carajas", 1);
+        }
+        catch (Exception e){e.printStackTrace();
+        }
+
+        double lougitude = listaGeoCoder.get(0).getLongitude();
+        double latitude = listaGeoCoder.get(0).getLatitude();
+
+
+        }
+        else {
+            solicitarPermissaolocalisacao();
+        }
     }
 
     /**
@@ -51,4 +78,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
     }
+private boolean permissaodeLocalizacao(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        == PackageManager.PERMISSION_DENIED
+        ){ return true; }
+
+        else {
+            return false;
+        }
+}
+
+private void solicitarPermissaolocalisacao(){
+
+    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_PERMISSION_CODE);
+
+}
+
 }
